@@ -400,7 +400,13 @@ module Spree
     end
 
     def available_payment_methods
-      @available_payment_methods ||= PaymentMethod.available(:front_end)
+      ##I ADDED
+      if self.user && self.total <= self.user.store_credits_total
+        @available_payment_methods = []
+      else
+
+        @available_payment_methods ||= PaymentMethod.available(:front_end) #originally
+      end
     end
 
     def pending_payments

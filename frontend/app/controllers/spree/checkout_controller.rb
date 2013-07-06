@@ -20,6 +20,10 @@ module Spree
 
     rescue_from Spree::Core::GatewayError, :with => :rescue_from_spree_gateway_error
 
+    def edit
+
+    end
+
     # Updates the order and advances to the next state (when possible.)
     def update
       if @order.update_attributes(object_params)
@@ -32,6 +36,16 @@ module Spree
         end
 
         if @order.completed?
+          ##I ADDED
+          @order.line_items.each do |line_item|
+            variant = line_item.variant
+            if variant.sku.downcase == 'credits'
+              preferred_amount = variant.price * line_item.quantity
+              @order.user.store_credits.create(:amount => preferred_amount, :remaining_amount => preferred_amount,  :reason => "Bought store credits")
+            end
+          end
+          ##I ADDED
+
           session[:order_id] = nil
           flash.notice = Spree.t(:order_processed_successfully)
           flash[:commerce_tracking] = "nothing special"
